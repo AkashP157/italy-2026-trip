@@ -283,17 +283,39 @@ input,textarea,select{font-family:inherit;font-size:inherit}
 .bk-meta{font-size:12px;color:var(--text2);margin-top:1px}
 .bk-chev{color:var(--text3);transition:transform .2s;font-size:11px;flex-shrink:0}
 .bk-card.open .bk-chev{transform:rotate(180deg)}
-.bk-detail{max-height:0;overflow:hidden;transition:max-height .3s ease}.bk-card.open .bk-detail{max-height:800px}
+.bk-detail{max-height:0;overflow:hidden;transition:max-height .3s ease}.bk-card.open .bk-detail{max-height:2000px}
 .bk-ticket{border-top:.5px solid var(--border);padding:14px 16px}
 .bk-fields{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
 .bk-field{flex:1;min-width:90px}
 .bk-field-l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:3px}
 .bk-field-v{font-size:13px;color:var(--text);line-height:1.4}
 .bk-field-v.mono{font-family:'Courier Prime',monospace;color:var(--accent);font-size:14px;font-weight:700}
-.bk-conf{background:var(--bg3);border-radius:var(--wr-sm);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.bk-conf{background:var(--bg3);border-radius:var(--wr-sm);padding:12px 14px;margin-top:10px;position:relative}
+.bk-conf-top{display:flex;align-items:center;justify-content:space-between}
 .bk-conf-label{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);font-weight:600}
-.bk-conf-code{font-family:'Courier Prime',monospace;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.bk-conf-code{font-family:'Courier Prime',monospace;font-size:20px;font-weight:700;color:var(--accent);letter-spacing:2px;word-break:break-all}
+.bk-conf-copy{font-size:10px;font-weight:600;color:var(--blue);cursor:pointer;padding:4px 8px;border-radius:4px;transition:all .12s;text-transform:uppercase;letter-spacing:.04em}
+.bk-conf-copy:hover{background:rgba(10,132,255,.12)}
+.bk-conf-copy.copied{color:var(--green)}
+.bk-qr{margin-top:10px;display:flex;justify-content:center}
+.bk-qr canvas{border-radius:var(--wr-xs);background:#fff;padding:8px}
 .bk-note{margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:var(--wr-xs);font-size:12px;color:var(--text2);line-height:1.6}
+.bk-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.bk-act{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:8px 12px;border-radius:var(--wr-xs);transition:all .12s;cursor:pointer}
+.bk-act:active{transform:scale(.96)}
+.bk-act-map{background:rgba(10,132,255,.12);color:var(--blue)}
+.bk-act-map:hover{background:rgba(10,132,255,.2)}
+.bk-act-call{background:rgba(48,209,88,.1);color:var(--green)}
+.bk-act-call:hover{background:rgba(48,209,88,.18)}
+.bk-act-copy{background:rgba(255,159,10,.1);color:var(--orange)}
+.bk-act-copy:hover{background:rgba(255,159,10,.18)}
+.bk-pax{margin-top:10px}
+.bk-pax-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);margin-bottom:6px}
+.bk-pax-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--widget2);border-radius:var(--wr-xs);margin-bottom:4px}
+.bk-pax-name{font-size:13px;font-weight:600;color:var(--text);flex-shrink:0;min-width:100px}
+.bk-pax-code{font-family:'Courier Prime',monospace;font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.5px;flex:1;word-break:break-all}
+.bk-pax-qr{display:flex;justify-content:center;margin-top:4px}
+.bk-pax-qr canvas{border-radius:4px;background:#fff;padding:4px}
 
 /* ========== MORE VIEW ========== */
 .more-pad{padding:16px;max-width:800px;margin:0 auto}
@@ -682,34 +704,46 @@ days:[
 ],
 bookings:{
   flights:[
-    {id:'f1',t:'HYD → BOM',dt:'Apr 2',tm:'~06:00',airline:'TBD',conf:'',ref:'',note:'First leg'},
-    {id:'f2',t:'BOM → FRA',dt:'Apr 2',tm:'~10:30',airline:'TBD',conf:'',ref:'',note:'Long-haul'},
-    {id:'f3',t:'FRA → ZRH',dt:'Apr 2',tm:'~18:00',airline:'TBD',conf:'',ref:'',note:'Short hop'},
-    {id:'f4',t:'MXP → DEL',dt:'Apr 19',tm:'21:15',airline:'TBD',conf:'',ref:'',note:'Return'}],
+    {id:'f1',t:'HYD → BOM',dt:'Apr 2',tm:'~06:00',airline:'TBD',conf:'',ref:'',note:'First leg',lat:17.2403,lng:78.4294},
+    {id:'f2',t:'BOM → FRA',dt:'Apr 2',tm:'~10:30',airline:'TBD',conf:'',ref:'',note:'Long-haul',lat:19.0896,lng:72.8656},
+    {id:'f3',t:'FRA → ZRH',dt:'Apr 2',tm:'~18:00',airline:'TBD',conf:'',ref:'',note:'Short hop',lat:50.0379,lng:8.5622},
+    {id:'f4',t:'MXP → DEL',dt:'Apr 19',tm:'21:15',airline:'TBD',conf:'',ref:'',note:'Return',lat:45.6306,lng:8.7281}],
   hotels:[
-    {id:'h1',t:'Holiday Inn Express Zurich',dt:'Apr 2 (1n)',addr:'Zurich Airport',in:'15:00',out:'11:00',conf:'',pin:'',phone:'',note:''},
-    {id:'h2',t:'Hotel Luiselle Sorrento',dt:'Apr 3–6 (4n)',addr:'Sorrento',in:'14:00',out:'10:00',conf:'',pin:'',phone:'',note:''},
-    {id:'h3',t:'AirBnB Rome — Wake At Rome',dt:'Apr 7–9 (3n)',addr:'Via Giovanni Lanza 150 Int.1, Rome 00184',in:'14:00',out:'10:00',conf:'HM5XE3EK9S',pin:'',phone:'+39 339 710 8260',note:'Host: Simone'},
-    {id:'h4',t:'AirBnB Florence',dt:'Apr 10–11 (2n)',addr:'Via Fiume 1, Florence 50123',in:'15:00',out:'11:00',conf:'HMSZQFQZMX',pin:'',phone:'+39 347 833 8446',note:'Host: Filippo'},
-    {id:'h5',t:'Borgo San Luigi',dt:'Apr 12–13 (2n)',addr:'Strada delle Cerreta 7, 53035 Monteriggioni',in:'15:00',out:'11:00',conf:'5829.896.263',pin:'2003',phone:'+39 0577 301055',note:'Classic w/ terrace · Breakfast included · Free parking'},
-    {id:'h6',t:'Hotel Leonardo Da Vinci',dt:'Apr 14 (1n)',addr:'Via Guido Monaco 12, Florence 50144',in:'15:00',out:'12:00',conf:'6986.438.938',pin:'4074',phone:'+39 055 098 1819',note:'Superior Double · Cancel free until Apr 12'},
-    {id:'h7',t:'Casa Rosa AirBnB Bellagio',dt:'Apr 15–17 (3n)',addr:'Salita Monastero 4, 4th floor, Bellagio 22021',in:'15:00',out:'10:00',conf:'HMXC3DR2FM',pin:'',phone:'+39 329 157 0355',note:'Host: Laura'},
-    {id:'h8',t:'Holiday Inn Express Milan-Malpensa',dt:'Apr 18 (1n)',addr:'Via F. De Pinedo, 21019 Case Nuove',in:'14:00',out:'12:00',conf:'6294.102.243',pin:'7510',phone:'+39 0331 18330',note:'King Room · Free breakfast · Free parking'}],
+    {id:'h1',t:'Holiday Inn Express Zurich',dt:'Apr 2 (1n)',addr:'Zurich Airport',in:'15:00',out:'11:00',conf:'',pin:'',phone:'',note:'',lat:47.4521,lng:8.5645},
+    {id:'h2',t:'Hotel Luiselle Sorrento',dt:'Apr 3–6 (4n)',addr:'Sorrento',in:'14:00',out:'10:00',conf:'',pin:'',phone:'',note:'',lat:40.6271,lng:14.3768},
+    {id:'h3',t:'AirBnB Rome — Wake At Rome',dt:'Apr 7–9 (3n)',addr:'Via Giovanni Lanza 150 Int.1, Rome 00184',in:'14:00',out:'10:00',conf:'HM5XE3EK9S',pin:'',phone:'+39 339 710 8260',note:'Host: Simone',lat:41.8951,lng:12.4977},
+    {id:'h4',t:'AirBnB Florence',dt:'Apr 10–11 (2n)',addr:'Via Fiume 1, Florence 50123',in:'15:00',out:'11:00',conf:'HMSZQFQZMX',pin:'',phone:'+39 347 833 8446',note:'Host: Filippo',lat:43.7795,lng:11.2540},
+    {id:'h5',t:'Borgo San Luigi',dt:'Apr 12–13 (2n)',addr:'Strada delle Cerreta 7, 53035 Monteriggioni',in:'15:00',out:'11:00',conf:'5829.896.263',pin:'2003',phone:'+39 0577 301055',note:'Classic w/ terrace · Breakfast included · Free parking',lat:43.3889,lng:11.1616},
+    {id:'h6',t:'Hotel Leonardo Da Vinci',dt:'Apr 14 (1n)',addr:'Via Guido Monaco 12, Florence 50144',in:'15:00',out:'12:00',conf:'6986.438.938',pin:'4074',phone:'+39 055 098 1819',note:'Superior Double · Cancel free until Apr 12',lat:43.7802,lng:11.2447},
+    {id:'h7',t:'Casa Rosa AirBnB Bellagio',dt:'Apr 15–17 (3n)',addr:'Salita Monastero 4, 4th floor, Bellagio 22021',in:'15:00',out:'10:00',conf:'HMXC3DR2FM',pin:'',phone:'+39 329 157 0355',note:'Host: Laura',lat:45.9870,lng:9.2608},
+    {id:'h8',t:'Holiday Inn Express Milan-Malpensa',dt:'Apr 18 (1n)',addr:'Via F. De Pinedo, 21019 Case Nuove',in:'14:00',out:'12:00',conf:'6294.102.243',pin:'7510',phone:'+39 0331 18330',note:'King Room · Free breakfast · Free parking',lat:45.6399,lng:8.7122}],
   trains:[
-    {id:'t1',t:'Zürich → Milano',dt:'Apr 3',tm:'07:33→10:50',op:'EuroCity 13',seat:'Coach 25 Seats 65/66',conf:'BWWEYN',cost:'€96 ea',note:'2nd Cl Famiglia'},
-    {id:'t2',t:'Milano → Roma',dt:'Apr 3',tm:'11:15→14:30',op:'Trenitalia 9979',seat:'Car 9 Seats 28/32',conf:'BGI1TD',cost:'€179.80',note:'Smart'},
-    {id:'t3',t:'Roma → Napoli',dt:'Apr 3',tm:'15:35→16:48',op:'Trenitalia 9981',seat:'Car 4 Seats 16/19',conf:'W8IQMB',cost:'€79.80',note:'Prima Business'},
-    {id:'t4',t:'Napoli → Sorrento',dt:'Apr 3',tm:'17:26',op:'Campania Express',seat:'W1 Seats 9/10',conf:'455374',cost:'€15 ea',note:''},
-    {id:'t5',t:'Sorrento → Napoli',dt:'Apr 7',tm:'10:20',op:'Campania Express',seat:'W1 Seats 38/39',conf:'455376',cost:'€15 ea',note:''},
-    {id:'t6',t:'Napoli → Roma',dt:'Apr 7',tm:'12:28→14:34',op:'Intercity 700',seat:'Coach 2 Seats 13A/12A',conf:'B285N5',cost:'€22.90 ea',note:'1st Cl · No changes'},
-    {id:'t7',t:'Roma → Firenze',dt:'Apr 10',tm:'12:25→13:57',op:'Trenitalia 8960',seat:'Car 2 Seats 24/27',conf:'IGGB3Q',cost:'€61.80',note:'Prima Business'},
-    {id:'t8',t:'Firenze → Milano',dt:'Apr 15',tm:'09:25→11:20',op:'Trenitalia 9912',seat:'Car 4 Seats 17/18',conf:'OBFBFF',cost:'€53.80',note:'Smart'},
-    {id:'t9',t:'Milano → Varenna',dt:'Apr 15',tm:'12:20→13:24',op:'Trenord 2824',seat:'2nd Cl',conf:'2780716453/54',cost:'€7.40 ea',note:'Regional'}],
+    {id:'t1',t:'Zürich → Milano',dt:'Apr 3',tm:'07:33→10:50',op:'EuroCity 13',seat:'Coach 25 Seats 65/66',conf:'BWWEYN',cost:'€96 ea',note:'2nd Cl Famiglia',pax:[{n:'Aditi Gulati',s:'Coach 25 Seat 65'},{n:'Akash Padmane',s:'Coach 25 Seat 66'}],lat:47.3769,lng:8.5417},
+    {id:'t2',t:'Milano → Roma',dt:'Apr 3',tm:'11:15→14:30',op:'Trenitalia 9979',seat:'Car 9 Seats 28/32',conf:'BGI1TD',cost:'€179.80',note:'Smart',pax:[{n:'Aditi Gulati',s:'Car 9 Seat 32'},{n:'Akash Padmane',s:'Car 9 Seat 28'}],lat:45.4861,lng:9.2049},
+    {id:'t3',t:'Roma → Napoli',dt:'Apr 3',tm:'15:35→16:48',op:'Trenitalia 9981',seat:'Car 4 Seats 16/19',conf:'W8IQMB',cost:'€79.80',note:'Prima Business',pax:[{n:'Akash Padmane',s:'Car 4 Seat 16'},{n:'Aditi Gulati',s:'Car 4 Seat 19'}],lat:41.9009,lng:12.5019},
+    {id:'t4',t:'Napoli → Sorrento',dt:'Apr 3',tm:'17:26',op:'Campania Express',seat:'W1 Seats 9/10',conf:'455374',cost:'€15 ea',note:'Booking #455374',pax:[{n:'Akash Padmane',s:'Wagon 1 Seat 9'},{n:'Aditi Gulati',s:'Wagon 1 Seat 10'}],lat:40.8531,lng:14.2681},
+    {id:'t5',t:'Sorrento → Napoli',dt:'Apr 7',tm:'10:20',op:'Campania Express',seat:'W1 Seats 38/39',conf:'455376',cost:'€15 ea',note:'Booking #455376',pax:[{n:'Akash Padmane',s:'Wagon 1 Seat 38'},{n:'Aditi Gulati',s:'Wagon 1 Seat 39'}],lat:40.6263,lng:14.3755},
+    {id:'t6',t:'Napoli → Roma',dt:'Apr 7',tm:'12:28→14:34',op:'Intercity 700',seat:'Coach 2 Seats 13A/12A',conf:'B285N5',cost:'€22.90 ea',note:'1st Cl · Super Economy · No changes/refund',pax:[{n:'Akash Padmane',s:'Coach 2 Seat 13A'},{n:'Aditi Gulati',s:'Coach 2 Seat 12A'}],lat:40.8531,lng:14.2681},
+    {id:'t7',t:'Roma → Firenze',dt:'Apr 10',tm:'12:25→13:57',op:'Trenitalia 8960',seat:'Car 2 Seats 24/27',conf:'IGGB3Q',cost:'€61.80',note:'Prima Business',pax:[{n:'Aditi Gulati',s:'Car 2 Seat 24'},{n:'Akash Padmane',s:'Car 2 Seat 27'}],lat:41.9009,lng:12.5019},
+    {id:'t8',t:'Firenze → Milano',dt:'Apr 15',tm:'09:25→11:20',op:'Trenitalia 9912',seat:'Car 4 Seats 17/18',conf:'OBFBFF',cost:'€53.80',note:'Smart',pax:[{n:'Aditi Gulati',s:'Car 4 Seat 17'},{n:'Akash Padmane',s:'Car 4 Seat 18'}],lat:43.7760,lng:11.2477},
+    {id:'t9',t:'Milano → Varenna',dt:'Apr 15',tm:'12:20→13:24',op:'Trenord 2824',seat:'2nd Cl',conf:'2780716453/54',cost:'€7.40 ea',note:'Regional',pax:[{n:'Aditi Gulati',s:'Code: 2780716453'},{n:'Akash Padmane',s:'Code: 2780716454'}],lat:45.4861,lng:9.2049}],
   tours:[
-    {id:'a1',t:'Colosseum / Forum / Palatine',dt:'Apr 8',tm:'08:30',venue:'Colosseum, Rome',conf:'OCO3604854',ref:'Akash: SPCO27A8AQNPPE88\nAditi: SPCOB2QDQWP68KPY',cost:'€18 ea',note:'Arrive 15 min early · Bring ID · 75 min visit\nForum/Palatine within 24h'},
-    {id:'a2',t:'Vatican Museums & Sistine Chapel',dt:'Apr 9',tm:'16:30',venue:'Viale Vaticano, Corridor 3',conf:'2L2NLE7B0000000FJ',ref:'via Klook Travel',cost:'€27 ea',note:'Validate at turnstile · Bring ID'},
-    {id:'a3',t:"Galleria dell'Accademia",dt:'Apr 11',tm:'08:15',venue:'Florence',conf:'Order 3887938',ref:'Akash ID: 125 · Aditi ID: 124',cost:'€24 ea',note:"Michelangelo's David"},
-    {id:'a4',t:'Duomo Climb — Brunelleschi Pass',dt:'Apr 14',tm:'17:15 SHARP',venue:'Cattedrale di Santa Maria del Fiore',conf:'87-MMA2A71 / SPLFRCPK2NLP',ref:'Akash: 87-PWI3B29\nAditi: 87-IW5GTVV',cost:'€30 ea',note:'⚠️ 463 steps · Porta della Mandorla\nBags → Piazza Duomo 38/r\nValid 3 days (Apr 14–16)'}]}
+    {id:'a1',t:'Colosseum / Forum / Palatine',dt:'Apr 8',tm:'08:30',venue:'Colosseum, Rome',conf:'OCO3604854',cost:'€18 ea',
+      pax:[{n:'Akash Padmane',code:'SPCO27A8AQNPPE88'},{n:'Aditi Gulati',code:'SPCOB2QDQWP68KPY'}],
+      note:'Arrive 15 min early · Bring ID · 75 min visit\nForum/Palatine within 24h\nColosseum: 1st & 2nd level only\nOne-way route · No backpacks/trolleys',
+      lat:41.8902,lng:12.4922},
+    {id:'a2',t:'Vatican Museums & Sistine Chapel',dt:'Apr 9',tm:'16:30',venue:'Viale Vaticano, Corridor 3',conf:'2L2NLE7B0000000FJ',cost:'€27 ea',
+      pax:[{n:'Akash Padmane',code:'7QJ2TS0O008FPCGS19CHG0M8'},{n:'Aditi Gulati',code:'2JVN7LP16SEB3EIQ7X0BUMZM'}],
+      note:'Validate at turnstile on 1st floor · Bring ID\nShow ticket to staff at CORRIDOR 3 entrance\nKlook Travel group · Pax 10 & 3 of 10',
+      lat:41.9029,lng:12.4545},
+    {id:'a3',t:"Galleria dell'Accademia",dt:'Apr 11',tm:'08:15',venue:'Galleria dell\'Accademia, Florence',conf:'Order 3887938',cost:'€24 ea',
+      pax:[{n:'Aditi Gulati',code:'Ticket ID: 124'},{n:'Akash Padmane',code:'Ticket ID: 125'}],
+      note:"Michelangelo's David\nEntry 08:15, slot up to 08:30",
+      lat:43.7768,lng:11.2588},
+    {id:'a4',t:'Duomo Climb — Brunelleschi Pass',dt:'Apr 14',tm:'17:15 SHARP',venue:'Cattedrale di Santa Maria del Fiore',conf:'87-MMA2A71',cost:'€30 ea',
+      pax:[{n:'Akash Padmane',code:'Ref: 87-PWI3B29'},{n:'Aditi Gulati',code:'Ref: 87-IW5GTVV'}],
+      note:'⚠️ 463 steps · NO lift · Porta della Mandorla entry\nBags → Luggage Storage Piazza Duomo 38/r\nValid 3 calendar days (Apr 14–16)\nAlso includes: Bell Tower, Baptistery, Museum, Santa Reparata\nBring ID — names checked at entrance',
+      lat:43.7731,lng:11.2560}]}
 };
 
 /* ══════════════ STATE ══════════════ */
@@ -920,20 +954,63 @@ const BkView={
     if(!items?.length){list.innerHTML='<div style="text-align:center;padding:40px;color:var(--text3);grid-column:1/-1">No bookings</div>';return}
     const em={flights:'✈️',hotels:'🏨',trains:'🚄',tours:'🎟️'}[k],ic={flights:'ic-flight',hotels:'ic-hotel',trains:'ic-train',tours:'ic-tour'}[k];
     list.innerHTML=items.map(b=>`<div class="bk-card${S.openBk.has(b.id)?' open':''}" id="bk-${b.id}"><div class="bk-head" onclick="BkView.tog('${b.id}')"><div class="bk-icon ${ic}">${em}</div><div class="bk-info"><div class="bk-title">${esc(b.t)}</div><div class="bk-meta">${esc(b.dt||b.tm||'')}</div></div><div class="bk-chev">▼</div></div><div class="bk-detail"><div class="bk-ticket">${this.rows(b,k)}</div></div></div>`).join('');
+    // Generate QR codes after DOM is ready
+    requestAnimationFrame(()=>this.qr());
   },
   rows(b,k){
     const f=(l,v)=>v?`<div class="bk-field"><div class="bk-field-l">${l}</div><div class="bk-field-v">${esc(v)}</div></div>`:'';
     let fields='',conf='';
     if(k==='flights'){fields=f('Time',b.tm)+f('Airline',b.airline);conf=b.conf}
-    else if(k==='hotels'){fields=f('Dates',b.dt)+f('Address',b.addr)+f('Check-in',b.in)+f('Check-out',b.out)+f('Phone',b.phone);conf=b.conf||b.pin}
-    else if(k==='trains'){fields=f('Date',b.dt)+f('Time',b.tm)+f('Operator',b.op)+f('Seat',b.seat)+f('Cost',b.cost);conf=b.conf}
-    else if(k==='tours'){fields=f('Date',b.dt)+f('Time',b.tm)+f('Venue',b.venue)+f('Cost',b.cost);conf=b.conf||b.ref}
+    else if(k==='hotels'){fields=f('Dates',b.dt)+f('Address',b.addr)+f('Check-in',b.in)+f('Check-out',b.out)+f('Phone',b.phone);conf=b.conf;if(b.pin)fields+=f('PIN',b.pin)}
+    else if(k==='trains'){fields=f('Date',b.dt)+f('Time',b.tm)+f('Operator',b.op)+f('Cost',b.cost);conf=b.conf}
+    else if(k==='tours'){fields=f('Date',b.dt)+f('Time',b.tm)+f('Venue',b.venue)+f('Cost',b.cost);conf=b.conf}
     let o=`<div class="bk-fields">${fields}</div>`;
-    if(conf)o+=`<div class="bk-conf"><span class="bk-conf-label">Confirmation</span><span class="bk-conf-code">${esc(conf)}</span></div>`;
+    // Confirmation code with copy + QR
+    if(conf){
+      o+=`<div class="bk-conf"><div class="bk-conf-top"><span class="bk-conf-label">Confirmation</span><span class="bk-conf-copy" onclick="BkView.copy(this,'${esc(conf)}')">Copy</span></div><div class="bk-conf-code">${esc(conf)}</div><div class="bk-qr" data-qr="${esc(conf)}"></div></div>`;
+    }
+    // Per-person details (train seats or tour ticket codes)
+    if(b.pax&&b.pax.length){
+      o+='<div class="bk-pax"><div class="bk-pax-head">Per Person</div>';
+      b.pax.forEach(p=>{
+        const val=p.s||p.code||'';
+        o+=`<div class="bk-pax-row"><div class="bk-pax-name">${esc(p.n)}</div><div class="bk-pax-code">${esc(val)}</div></div>`;
+        if(p.code)o+=`<div class="bk-pax-qr" data-qr="${esc(p.code)}"></div>`;
+      });
+      o+='</div>';
+    }
+    // Notes
     if(b.note)o+=`<div class="bk-note">${b.note.split('\n').map(l=>esc(l)).join('<br>')}</div>`;
+    // Action buttons
+    const acts=[];
+    if(b.lat&&b.lng)acts.push(`<a class="bk-act bk-act-map" href="https://www.google.com/maps/search/?api=1&query=${b.lat},${b.lng}" target="_blank" rel="noopener">📍 Navigate</a>`);
+    if(b.phone)acts.push(`<a class="bk-act bk-act-call" href="tel:${esc(b.phone)}">📞 ${esc(b.phone)}</a>`);
+    if(conf)acts.push(`<span class="bk-act bk-act-copy" onclick="BkView.copy(this,'${esc(conf)}')">📋 Copy Code</span>`);
+    if(acts.length)o+=`<div class="bk-actions">${acts.join('')}</div>`;
     return o;
   },
-  tog(id){if(S.openBk.has(id))S.openBk.delete(id);else S.openBk.add(id);document.getElementById('bk-'+id)?.classList.toggle('open')}
+  copy(el,text){
+    navigator.clipboard.writeText(text).then(()=>{
+      el.textContent=el.tagName==='SPAN'&&el.classList.contains('bk-conf-copy')?'Copied!':'📋 Copied!';
+      el.classList.add('copied');
+      setTimeout(()=>{el.textContent=el.classList.contains('bk-conf-copy')?'Copy':'📋 Copy Code';el.classList.remove('copied')},1500);
+    });
+  },
+  qr(){
+    if(typeof QRCode==='undefined')return;
+    document.querySelectorAll('[data-qr]').forEach(el=>{
+      if(el.querySelector('canvas'))return;
+      const text=el.dataset.qr;if(!text)return;
+      const size=el.classList.contains('bk-pax-qr')?100:140;
+      try{new QRCode(el,{text,width:size,height:size,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M})}catch(e){}
+    });
+  },
+  tog(id){
+    if(S.openBk.has(id))S.openBk.delete(id);else S.openBk.add(id);
+    document.getElementById('bk-'+id)?.classList.toggle('open');
+    // Re-render QR codes after card opens
+    setTimeout(()=>this.qr(),350);
+  }
 };
 
 /* ══════════════ CHECKLIST ══════════════ */
@@ -1046,6 +1123,11 @@ function boot(){
 document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')}));
 document.addEventListener('DOMContentLoaded',boot);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
+// Load QR code library
+const _qrScript=document.createElement('script');
+_qrScript.src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+_qrScript.onload=()=>{if(S.tab==='bookings')BkView.qr()};
+document.head.appendChild(_qrScript);
 </script>
 </body>
 </html>
