@@ -436,10 +436,73 @@ input,textarea,select{font-family:inherit;font-size:inherit}
 @keyframes sheet-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ========== AUTH LOCK SCREEN ========== */
+#auth-wall{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .35s ease;
+}
+#auth-wall.hidden{opacity:0;pointer-events:none}
+.auth-card{
+  width:100%;max-width:360px;padding:40px 24px;text-align:center;
+}
+.auth-flag{font-size:56px;margin-bottom:16px;display:block}
+.auth-title{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.auth-sub{font-size:14px;color:var(--text2);margin-bottom:28px}
+.auth-input{
+  width:100%;padding:14px 16px;
+  background:var(--widget);border:none;border-radius:var(--wr-sm);
+  color:var(--text);font-size:15px;outline:none;
+  text-align:center;transition:box-shadow .2s;
+}
+.auth-input:focus{box-shadow:0 0 0 2px var(--blue)}
+.auth-input.otp-input{
+  font-family:'Courier Prime',monospace;font-size:28px;font-weight:700;
+  letter-spacing:10px;padding:16px;
+}
+.auth-btn{
+  width:100%;padding:14px;margin-top:12px;
+  background:var(--blue);color:#fff;
+  border:none;border-radius:var(--wr-sm);
+  font-size:15px;font-weight:600;
+  cursor:pointer;transition:opacity .12s;
+}
+.auth-btn:hover{opacity:.85}
+.auth-btn:active{transform:scale(.97)}
+.auth-btn:disabled{opacity:.4;cursor:not-allowed}
+.auth-error{font-size:13px;color:var(--red);margin-top:10px;min-height:20px}
+.auth-link{font-size:13px;color:var(--blue);margin-top:14px;cursor:pointer;display:inline-block}
+.auth-step{display:none}.auth-step.active{display:block;animation:fadeIn .2s ease}
+.auth-logout{position:absolute;top:16px;right:16px}
 </style>
 </head>
 <body>
-<div id="app">
+<!-- AUTH WALL -->
+<div id="auth-wall">
+  <div class="auth-card">
+    <div id="auth-step-email" class="auth-step active">
+      <span class="auth-flag">🇮🇹</span>
+      <div class="auth-title">Italy 2026</div>
+      <div class="auth-sub">Enter your email to access the trip planner</div>
+      <input class="auth-input" id="auth-email" type="email" placeholder="your@email.com" autocomplete="email" inputmode="email">
+      <button class="auth-btn" id="auth-send-btn" onclick="Auth.sendOTP()">Send Access Code</button>
+      <div class="auth-error" id="auth-email-err"></div>
+    </div>
+    <div id="auth-step-otp" class="auth-step">
+      <span class="auth-flag">📬</span>
+      <div class="auth-title">Check your email</div>
+      <div class="auth-sub" id="auth-otp-sub">We sent a 6-digit code to your email</div>
+      <input class="auth-input otp-input" id="auth-otp" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code">
+      <button class="auth-btn" id="auth-verify-btn" onclick="Auth.verifyOTP()">Verify Code</button>
+      <div class="auth-error" id="auth-otp-err"></div>
+      <span class="auth-link" onclick="Auth.backToEmail()">← Use different email</span>
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
 <header id="header">
   <div class="logo"><span class="logo-flag">🇮🇹</span><span class="logo-text">Italy 2026</span></div>
   <div class="hdr-right">
@@ -1064,7 +1127,7 @@ const BG={
 };
 
 /* ══════════════ MORE VIEW ══════════════ */
-const MoreView={render(){document.getElementById('v-more').innerHTML=`<div class="more-pad"><div class="more-section">${CL.render()}</div><div class="more-section">${BG.render()}</div><div class="more-section"><div class="more-header"><div class="more-title">Tools</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="PDF.show()">📄 Import PDFs</button><button class="btn btn-secondary" onclick="Settings.show()">⚙️ Settings</button></div></div></div>`}};
+const MoreView={render(){document.getElementById('v-more').innerHTML=`<div class="more-pad"><div class="more-section">${CL.render()}</div><div class="more-section">${BG.render()}</div><div class="more-section"><div class="more-header"><div class="more-title">Tools</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="PDF.show()">📄 Import PDFs</button><button class="btn btn-secondary" onclick="Settings.show()">⚙️ Settings</button><button class="btn btn-danger" onclick="Auth.logout()">🔒 Sign Out</button></div></div></div>`}};
 
 /* ══════════════ PANEL ══════════════ */
 const Panel={
@@ -1106,6 +1169,79 @@ const Settings={
   clear(){if(confirm('Clear all data?')){localStorage.removeItem(this.K);localStorage.removeItem(CL.K);localStorage.removeItem(BG.K);S.dateOverride=null;boot();this.hide()}}
 };
 
+/* ══════════════ AUTH ══════════════ */
+const Auth={
+  K:'italy26_token',
+  email:'',
+  async init(){
+    Theme.init();
+    const token=localStorage.getItem(this.K);
+    if(token){
+      try{
+        const r=await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+        const j=await r.json();
+        if(j.ok&&j.valid){this.unlock();return}
+      }catch(e){}
+      localStorage.removeItem(this.K);
+    }
+    // Show auth wall
+    document.getElementById('auth-wall').classList.remove('hidden');
+    document.getElementById('auth-email').addEventListener('keydown',e=>{if(e.key==='Enter')this.sendOTP()});
+    document.getElementById('auth-otp').addEventListener('keydown',e=>{if(e.key==='Enter')this.verifyOTP()});
+    // Auto-submit when 6 digits entered
+    document.getElementById('auth-otp').addEventListener('input',e=>{if(e.target.value.length===6)this.verifyOTP()});
+  },
+  async sendOTP(){
+    const email=document.getElementById('auth-email').value.trim();
+    const err=document.getElementById('auth-email-err');
+    const btn=document.getElementById('auth-send-btn');
+    if(!email||!email.includes('@')){err.textContent='Enter a valid email';return}
+    err.textContent='';btn.disabled=true;btn.textContent='Sending...';
+    try{
+      const r=await fetch('/api/send-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+      const j=await r.json();
+      if(!r.ok){err.textContent=j.error||'Failed to send';btn.disabled=false;btn.textContent='Send Access Code';return}
+      this.email=email;
+      document.getElementById('auth-otp-sub').textContent=`We sent a 6-digit code to ${email}`;
+      document.getElementById('auth-step-email').classList.remove('active');
+      document.getElementById('auth-step-otp').classList.add('active');
+      document.getElementById('auth-otp').focus();
+    }catch(e){err.textContent='Network error. Try again.'}
+    btn.disabled=false;btn.textContent='Send Access Code';
+  },
+  async verifyOTP(){
+    const otp=document.getElementById('auth-otp').value.trim();
+    const err=document.getElementById('auth-otp-err');
+    const btn=document.getElementById('auth-verify-btn');
+    if(!otp||otp.length!==6){err.textContent='Enter the 6-digit code';return}
+    err.textContent='';btn.disabled=true;btn.textContent='Verifying...';
+    try{
+      const r=await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:this.email,otp})});
+      const j=await r.json();
+      if(!r.ok){err.textContent=j.error||'Invalid code';btn.disabled=false;btn.textContent='Verify Code';return}
+      localStorage.setItem(this.K,j.token);
+      this.unlock();
+    }catch(e){err.textContent='Network error.'}
+    btn.disabled=false;btn.textContent='Verify Code';
+  },
+  backToEmail(){
+    document.getElementById('auth-step-otp').classList.remove('active');
+    document.getElementById('auth-step-email').classList.add('active');
+    document.getElementById('auth-otp').value='';
+    document.getElementById('auth-otp-err').textContent='';
+  },
+  unlock(){
+    document.getElementById('auth-wall').classList.add('hidden');
+    document.getElementById('app').style.display='';
+    setTimeout(()=>document.getElementById('auth-wall').remove(),500);
+    boot();
+  },
+  logout(){
+    localStorage.removeItem(this.K);
+    location.reload();
+  }
+};
+
 /* ══════════════ BOOT ══════════════ */
 function boot(){
   Theme.init();CL.init();
@@ -1121,7 +1257,7 @@ function boot(){
   Weather.fetch().then(()=>{TodayView.render();TodayView.startCD();if(S.tab==='days')DaysView.show(S.dayIdx)});
 }
 document.querySelectorAll('.overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on')}));
-document.addEventListener('DOMContentLoaded',boot);
+document.addEventListener('DOMContentLoaded',()=>Auth.init());
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js');
 // Load QR code library
 const _qrScript=document.createElement('script');
