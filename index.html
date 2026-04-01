@@ -1173,6 +1173,7 @@ const Settings={
 const Auth={
   K:'italy26_token',
   email:'',
+  challenge:'',
   async init(){
     Theme.init();
     const token=localStorage.getItem(this.K);
@@ -1184,11 +1185,9 @@ const Auth={
       }catch(e){}
       localStorage.removeItem(this.K);
     }
-    // Show auth wall
     document.getElementById('auth-wall').classList.remove('hidden');
     document.getElementById('auth-email').addEventListener('keydown',e=>{if(e.key==='Enter')this.sendOTP()});
     document.getElementById('auth-otp').addEventListener('keydown',e=>{if(e.key==='Enter')this.verifyOTP()});
-    // Auto-submit when 6 digits entered
     document.getElementById('auth-otp').addEventListener('input',e=>{if(e.target.value.length===6)this.verifyOTP()});
   },
   async sendOTP(){
@@ -1202,6 +1201,7 @@ const Auth={
       const j=await r.json();
       if(!r.ok){err.textContent=j.error||'Failed to send';btn.disabled=false;btn.textContent='Send Access Code';return}
       this.email=email;
+      this.challenge=j.challenge;
       document.getElementById('auth-otp-sub').textContent=`We sent a 6-digit code to ${email}`;
       document.getElementById('auth-step-email').classList.remove('active');
       document.getElementById('auth-step-otp').classList.add('active');
@@ -1216,7 +1216,7 @@ const Auth={
     if(!otp||otp.length!==6){err.textContent='Enter the 6-digit code';return}
     err.textContent='';btn.disabled=true;btn.textContent='Verifying...';
     try{
-      const r=await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:this.email,otp})});
+      const r=await fetch('/api/verify-otp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({otp,challenge:this.challenge})});
       const j=await r.json();
       if(!r.ok){err.textContent=j.error||'Invalid code';btn.disabled=false;btn.textContent='Verify Code';return}
       localStorage.setItem(this.K,j.token);

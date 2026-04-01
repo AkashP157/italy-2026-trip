@@ -2,7 +2,10 @@ const crypto = require('crypto');
 
 const OTP_SECRET = process.env.OTP_SECRET || 'fallback-secret-change-me';
 
-const otpStore = globalThis.__otpStore || (globalThis.__otpStore = new Map());
+function signOTP(email, otp, expiry) {
+  const data = `${email}:${otp}:${expiry}`;
+  return crypto.createHmac('sha256', OTP_SECRET).update(data).digest('hex');
+}
 
 function signToken(email) {
   const payload = JSON.stringify({ email, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 });
@@ -30,7 +33,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, otp, token } = req.body || {};
+  const { email, otp, challenge, token } = req.body || {};
 
   // Token validation mode (check existing session)
   if (token) {
@@ -40,38 +43,34 @@ module.exports = async function handler(req, res) {
   }
 
   // OTP verification mode
-  if (!email || !otp) {
-    return res.status(400).json({ error: 'Email and OTP required' });
+  if (!otp || !challenge) {
+    return res.status(400).json({ error: 'Code and challenge required' });
   }
 
-  const normalized = email.trim().toLowerCase();
-  const stored = otpStore.get(normalized);
-
-  if (!stored) {
-    return res.status(400).json({ error: 'No code found. Request a new one.' });
+  // Decode the challenge
+  let ch;
+  try {
+    ch = JSON.parse(Buffer.from(challenge, 'base64url').toString());
+  } catch {
+    return res.status(400).json({ error: 'Invalid challenge' });
   }
 
-  // Expiry check (10 minutes)
-  if (Date.now() - stored.created > 600000) {
-    otpStore.delete(normalized);
+  if (!ch.email || !ch.expiry || !ch.sig) {
+    return res.status(400).json({ error: 'Malformed challenge' });
+  }
+
+  // Check expiry
+  if (Date.now() > ch.expiry) {
     return res.status(400).json({ error: 'Code expired. Request a new one.' });
   }
 
-  // Brute force protection (max 5 attempts)
-  if (stored.attempts >= 5) {
-    otpStore.delete(normalized);
-    return res.status(429).json({ error: 'Too many attempts. Request a new code.' });
+  // Verify: recompute HMAC(email:otp:expiry) and compare to stored sig
+  const expected = signOTP(ch.email, otp.trim(), ch.expiry);
+  if (expected !== ch.sig) {
+    return res.status(400).json({ error: 'Invalid code. Try again.' });
   }
 
-  stored.attempts++;
-
-  if (stored.otp !== otp.trim()) {
-    return res.status(400).json({ error: `Invalid code. ${5 - stored.attempts} attempts left.` });
-  }
-
-  // Success — clean up and issue token
-  otpStore.delete(normalized);
-  const sessionToken = signToken(normalized);
-
-  return res.status(200).json({ ok: true, token: sessionToken, email: normalized });
+  // Success — issue session token
+  const sessionToken = signToken(ch.email);
+  return res.status(200).json({ ok: true, token: sessionToken, email: ch.email });
 };

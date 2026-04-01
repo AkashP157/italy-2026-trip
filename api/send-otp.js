@@ -1,25 +1,20 @@
 const crypto = require('crypto');
 
-const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || '').split(',').map(e => e.trim().toLowerCase());
+const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean);
 const OTP_SECRET = process.env.OTP_SECRET || 'fallback-secret-change-me';
 const RESEND_KEY = process.env.RESEND_KEY || '';
-
-// OTP store (in-memory, fine for serverless cold starts — OTPs are short-lived)
-// For production at scale, use Vercel KV. For 2 users this is fine.
-const otpStore = globalThis.__otpStore || (globalThis.__otpStore = new Map());
 
 function generateOTP() {
   return crypto.randomInt(100000, 999999).toString();
 }
 
-function signToken(email) {
-  const payload = JSON.stringify({ email, exp: Date.now() + 7 * 24 * 60 * 60 * 1000 }); // 7 days
-  const sig = crypto.createHmac('sha256', OTP_SECRET).update(payload).digest('hex');
-  return Buffer.from(payload).toString('base64') + '.' + sig;
+// Create HMAC of (email + otp + expiry) so verify-otp can validate statelessly
+function signOTP(email, otp, expiry) {
+  const data = `${email}:${otp}:${expiry}`;
+  return crypto.createHmac('sha256', OTP_SECRET).update(data).digest('hex');
 }
 
 module.exports = async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -36,21 +31,10 @@ module.exports = async function handler(req, res) {
     return res.status(403).json({ error: 'Email not authorized' });
   }
 
-  // Rate limit: max 1 OTP per 60 seconds per email
-  const existing = otpStore.get(normalized);
-  if (existing && Date.now() - existing.created < 60000) {
-    return res.status(429).json({ error: 'Please wait 60 seconds before requesting a new code' });
-  }
-
   const otp = generateOTP();
-  otpStore.set(normalized, { otp, created: Date.now(), attempts: 0 });
+  const expiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+  const signature = signOTP(normalized, otp, expiry);
 
-  // Clean up old entries
-  for (const [key, val] of otpStore) {
-    if (Date.now() - val.created > 600000) otpStore.delete(key); // 10 min expiry
-  }
-
-  // Send via Resend
   if (!RESEND_KEY) {
     return res.status(500).json({ error: 'Email service not configured' });
   }
@@ -81,7 +65,12 @@ module.exports = async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to send email' });
     }
 
-    return res.status(200).json({ ok: true, message: 'Code sent' });
+    // Return signed challenge (email + expiry + sig) — OTP itself is NOT sent to client
+    return res.status(200).json({
+      ok: true,
+      message: 'Code sent',
+      challenge: Buffer.from(JSON.stringify({ email: normalized, expiry, sig: signature })).toString('base64url')
+    });
   } catch (err) {
     console.error('Send error:', err);
     return res.status(500).json({ error: 'Failed to send email' });
